@@ -104,3 +104,23 @@ def validate_transaction():
         return flask.jsonify(valid=False, error=repr(e))
 
     return flask.jsonify(valid=True, error='')
+
+
+# TODO: Not really sure what a good route would be. It'll probably change if
+#       the concept of 'owner' changes.
+@basic_views.route('/inputs/<owner>', methods=['GET'])
+def get_available_inputs(owner):
+    """API endpoint to return all txids that are available ("unspent") to
+    `owner`
+
+    Args:
+        owner (str): a base58-encoded public key
+
+    Return:
+        A JSON object with the `inputs` field populated with an array of txids
+        whose `current_owner` is `owner`
+    """
+
+    bigchain = current_app.config['bigchain']
+
+    return flask.jsonify(inputs=bigchain.get_owned_ids(owner))

@@ -7,7 +7,7 @@ from bigchaindb import util
 
 TX_ENDPOINT = '/api/v1/transactions/'
 VALIDATE_ENDPOINT = '/api/v1/transactions/validate/'
-
+INPUTS_ENDPOINT = lambda pubkey: '/api/v1/inputs/{}'.format(pubkey)
 
 @pytest.fixture
 def valid_create_transaction(user_public_key):
@@ -101,3 +101,10 @@ def test_post_validate_transaction_endpoint(b, client, user_public_key,
     assert res.json['valid'] == False
     assert res.json['error'] == \
         "ValueError('Only `CREATE` transactions can have null inputs',)"
+
+
+@pytest.mark.usefixtures('inputs')
+def test_get_available_inputs_endpoint(b, client, user_public_key):
+
+    res = client.get(INPUTS_ENDPOINT(user_public_key))
+    assert res.json == {'inputs': b.get_owned_ids(user_public_key)}
